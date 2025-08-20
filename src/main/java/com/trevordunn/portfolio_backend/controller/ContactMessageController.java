@@ -8,14 +8,22 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/contact")
-@CrossOrigin(origins = "*")  // allow requests from any origin (adjust for production)
 public class ContactMessageController {
 
+    private final ContactMessageRepository repository;
+
     @Autowired
-    private ContactMessageRepository repository;
+    public ContactMessageController(ContactMessageRepository repository) {
+        this.repository = repository;
+    }
 
     @PostMapping
     public ResponseEntity<String> submitContactMessage(@RequestBody ContactMessage message) {
+        // Ensure submittedAt is set if not already (optional safety)
+        if (message.getSubmittedAt() == null) {
+            message.setSubmittedAt(java.time.LocalDateTime.now());
+        }
+
         repository.save(message);
         return ResponseEntity.ok("Message received");
     }
